@@ -29,9 +29,18 @@ class GestorPrestamos:
         self.prestamos: List[Prestamo] = []
 
     def agregar_prestamo(self, id_material: str, id_usuario: str):
-        nuevo_prestamo = Prestamo(id_material, id_usuario, datetime.now())
-        self.prestamos.append(nuevo_prestamo)
-        return nuevo_prestamo
+        try:
+            nuevo_prestamo = Prestamo(
+                id_material=id_material,
+                id_usuario=id_usuario,
+                fecha_prestamo=datetime.now(),
+                fecha_devolucion=None
+            )
+            self.prestamos.append(nuevo_prestamo)
+            return nuevo_prestamo
+        except Exception as e:
+            print(f"Error al crear el préstamo: {str(e)}")
+            return None
 
     def devolver_prestamo(self, id_material: str):
         for prestamo in self.prestamos:

@@ -9,6 +9,11 @@ if __name__ == "__main__":
         print("\nInicializando la base de datos...")
         db.init_db()
         
+        # Eliminar datos existentes
+        materiales = []
+        usuarios = []
+        prestamos = []
+        
         # Cargar datos
         print("\nCargando datos...")
         materiales = cargar_materiales()

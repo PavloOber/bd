@@ -23,20 +23,32 @@ def guardar_usuarios(usuarios):
         db.guardar_usuario(usuario)
     return True
 
-def mostrar_usuarios():
-    try:
-        usuarios = cargar_usuarios()
-        print("\n=== Lista de Usuarios ===")
-        print(f"Número total de usuarios: {len(usuarios)}")
-        for i, usuario in enumerate(usuarios):
-            print(f"\nUsuario {i+1}:")
-            usuario.mostrar_info()
-    except Exception as e:
-        print(f"Error al mostrar usuarios: {str(e)}")
+
 
 def cargar_prestamos():
     db = Database()
-    return db.obtener_prestamos()
+    prestamos_data = db.obtener_prestamos()
+    prestamos = []
+    
+    for prestamo_data in prestamos_data:
+        try:
+            # Convertir las fechas de string a datetime
+            fecha_prestamo = datetime.fromisoformat(prestamo_data['fecha_prestamo'])
+            fecha_devolucion = datetime.fromisoformat(prestamo_data['fecha_devolucion']) if prestamo_data['fecha_devolucion'] else None
+            
+            # Crear objeto Prestamo
+            prestamo = Prestamo(
+                id_material=prestamo_data['id_material'],
+                id_usuario=prestamo_data['id_usuario'],
+                fecha_prestamo=fecha_prestamo,
+                fecha_devolucion=fecha_devolucion
+            )
+            prestamos.append(prestamo)
+        except Exception as e:
+            print(f"Error al cargar préstamo: {str(e)}")
+            continue
+    
+    return prestamos
 
 def guardar_prestamos(prestamos):
     db = Database()

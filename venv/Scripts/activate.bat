@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=C:\Users\Dell\Documents\Pavlo\Python\Libreria_POO\venv"
+set "VIRTUAL_ENV=C:\Users\Dell\Documents\GitHub\bd\venv"
 
 if not defined PROMPT set PROMPT=$P$G
 

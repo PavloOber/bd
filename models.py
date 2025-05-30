@@ -32,6 +32,9 @@ class MaterialBiblioteca(ABC):
     def get_disponible(self):
         return self.__disponible
 
+    def get_tipo(self):
+        return self.tipo
+
     # Setters
     def set_titulo(self, titulo):
         self.__titulo = titulo
@@ -49,20 +52,44 @@ class MaterialBiblioteca(ABC):
         self.__disponible = disponible
 
 class Libro(MaterialBiblioteca):
-    def __init__(self, titulo, autor, codigo_inventario, num_paginas, ubicacion, disponible=True):
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, num_paginas=None, disponible=True):
         super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.__num_paginas = num_paginas
+        self.tipo = "Libro"
+        self.num_paginas = num_paginas
+
+    def get_num_paginas(self):
+        return self.num_paginas
+
+    def set_num_paginas(self, num_paginas):
+        self.num_paginas = num_paginas
+
+    def get_tipo(self):
+        return self.tipo
 
     def mostrar_info(self):
         print(f"\n--- LIBRO ---")
         super().mostrar_info()
-        print(f"Número de páginas: {self.__num_paginas}")
+        if self.num_paginas is not None:
+            print(f"Número de páginas: {self.num_paginas}")
 
 class Revista(MaterialBiblioteca):
     def __init__(self, titulo, autor, codigo_inventario, numero_edicion, fecha_publicacion, ubicacion, disponible=True):
         super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.__numero_edicion = numero_edicion
-        self.__fecha_publicacion = fecha_publicacion
+        self.tipo = "Revista"
+        self.numero_edicion = numero_edicion
+        self.fecha_publicacion = fecha_publicacion
+
+    def get_numero_edicion(self):
+        return self.numero_edicion
+
+    def set_numero_edicion(self, numero_edicion):
+        self.numero_edicion = numero_edicion
+
+    def get_fecha_publicacion(self):
+        return self.fecha_publicacion
+
+    def set_fecha_publicacion(self, fecha_publicacion):
+        self.fecha_publicacion = fecha_publicacion
 
     def mostrar_info(self):
         print(f"\n--- REVISTA ---")
@@ -73,8 +100,21 @@ class Revista(MaterialBiblioteca):
 class DVD(MaterialBiblioteca):
     def __init__(self, titulo, autor, codigo_inventario, duracion, formato, ubicacion, disponible=True):
         super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.__duracion = duracion
-        self.__formato = formato
+        self.tipo = "DVD"
+        self.duracion = duracion
+        self.formato = formato
+
+    def get_duracion(self):
+        return self.duracion
+
+    def set_duracion(self, duracion):
+        self.duracion = duracion
+
+    def get_formato(self):
+        return self.formato
+
+    def set_formato(self, formato):
+        self.formato = formato
 
     def mostrar_info(self):
         print(f"\n--- DVD ---")
@@ -107,8 +147,10 @@ class Usuario:
         print(f"ID: {self.__id_usuario}")
         print(f"Nombre: {self.__nombre}")
         print(f"Correo: {self.__correo}")
-        print(f"Tipo: {self.__tipo_usuario}")
-        print(f"Libros prestados: {len(self.__libros_prestados)}")
+        print(f"Tipo de usuario: {self.__tipo_usuario}")
+        print("Libros prestados:")
+        for libro in self.__libros_prestados:
+            print(f"- {libro.get_titulo()}")
 
     def prestar_libro(self, libro):
         if libro.get_disponible():

@@ -1,6 +1,7 @@
 from models import Libro, Revista, DVD, Usuario
 from prestamo import GestorPrestamos
-from utils import cargar_materiales, cargar_usuarios, guardar_prestamos
+from utils import cargar_materiales, cargar_usuarios, guardar_prestamos, guardar_usuarios
+from database import Database
 
 
 def agregar_material(materiales):
@@ -12,22 +13,40 @@ def agregar_material(materiales):
     codigo = input("Código de inventario: ")
     ubicacion = "Biblioteca principal"
 
-    if tipo == "libro":
-        paginas = int(input("Número de páginas: "))
-        materiales.append(Libro(titulo, autor, codigo, paginas, ubicacion))
-        print("Libro agregado correctamente.")
-    elif tipo == "revista":
-        edicion = input("Número de edición: ")
-        fecha = input("Fecha de publicación (dd/mm/aaaa): ")
-        materiales.append(Revista(titulo, autor, codigo, edicion, fecha, ubicacion))
-        print("Revista agregada correctamente.")
-    elif tipo == "dvd":
-        duracion = int(input("Duración (en minutos): "))
-        formato = input("Formato (ej. Blu-ray, DVD): ")
-        materiales.append(DVD(titulo, autor, codigo, duracion, formato, ubicacion))
-        print("DVD agregado correctamente.")
-    else:
-        print("Tipo de material no reconocido.")
+    try:
+        if tipo == "libro":
+            paginas = int(input("Número de páginas: "))
+            libro = Libro(titulo, autor, codigo, ubicacion, paginas)
+            materiales.append(libro)
+            db = Database()
+            db.guardar_material(libro)
+            print("Libro agregado correctamente.")
+        elif tipo == "revista":
+            edicion = input("Número de edición: ")
+            fecha = input("Fecha de publicación (dd/mm/aaaa): ")
+            revista = Revista(titulo, autor, codigo, ubicacion, edicion, fecha)
+            materiales.append(revista)
+            db = Database()
+            db.guardar_material(revista)
+            print("Revista agregada correctamente.")
+        elif tipo == "dvd":
+            duracion = int(input("Duración (en minutos): "))
+            formato = input("Formato (ej. Blu-ray, DVD): ")
+            dvd = DVD(titulo, autor, codigo, ubicacion, duracion, formato)
+            materiales.append(dvd)
+            db = Database()
+            db.guardar_material(dvd)
+            print("DVD agregado correctamente.")
+        else:
+            print("Tipo de material no reconocido.")
+    except Exception as e:
+        print(f"Error al agregar el material: {str(e)}")
+        if tipo == "libro":
+            materiales.pop()
+        elif tipo == "revista":
+            materiales.pop()
+        elif tipo == "dvd":
+            materiales.pop()
 
 def eliminar_material(materiales):
     if not materiales:
@@ -38,12 +57,18 @@ def eliminar_material(materiales):
     try:
         index = int(input("Selecciona el número del material a eliminar: ")) - 1
         if 0 <= index < len(materiales):
-            materiales.pop(index)
+            material = materiales.pop(index)
+            db = Database()
+            db.eliminar_material(material.get_codigo_inventario())
             print("Material eliminado correctamente.")
         else:
             print("Índice fuera de rango.")
     except ValueError:
         print("Entrada inválida.")
+    except Exception as e:
+        print(f"Error al eliminar el material: {str(e)}")
+        # Restaurar el material en caso de error
+        materiales.insert(index, material)
 
 def cambiar_disponibilidad(materiales):
     if not materiales:
@@ -103,16 +128,30 @@ def Menu(materiales, usuarios, prestamos):
         print("9. Salir")
         opcion = input("\nElige una opción: ")
 
-        if opcion == "7":
-            gestion_prestamos(materiales, usuarios, gestor_prestamos)
+        if opcion == "1":
+            agregar_material(materiales)
+        elif opcion == "2":
+            if not materiales:
+                print("No hay materiales registrados.")
+            else:
+                listar_materiales(materiales)
+        elif opcion == "3":
+            mostrar_info_material(materiales)
+        elif opcion == "4":
+            eliminar_material(materiales)
+        elif opcion == "5":
+            cambiar_disponibilidad(materiales)
         elif opcion == "6":
             gestion_usuarios(materiales, usuarios)
+        elif opcion == "7":
+            gestion_prestamos(materiales, usuarios, gestor_prestamos)
         elif opcion == "8":
             mostrar_contenido_archivo()
         elif opcion == "9":
-            # Guardar préstamos antes de salir
-            guardar_prestamos(gestor_prestamos.prestamos)
+            print("\n¡Hasta luego!")
             break
+        else:
+            print("Opción inválida. Por favor, intenta de nuevo.")
 
 def gestion_prestamos(materiales, usuarios, gestor_prestamos):
     while True:
@@ -165,31 +204,55 @@ def gestion_usuarios(materiales, usuarios):
         print("2. Listar usuarios")
         print("3. Eliminar usuario")
         print("4. Volver al menú principal")
-        opcion = input("\nElige una opción: ")
 
+        opcion = input("\nElige una opción: ")
+        
         if opcion == "1":
-            agregar_usuario(usuarios)
+            try:
+                nuevo_usuario = agregar_usuario(usuarios)
+                if nuevo_usuario:
+                    guardar_usuarios(usuarios)
+                    print(f"Usuario agregado exitosamente!\nID: {nuevo_usuario.get_id_usuario()}\nNombre: {nuevo_usuario.get_nombre()}\nCorreo: {nuevo_usuario.get_correo()}\nTipo: {nuevo_usuario.get_tipo_usuario()}")
+                    mostrar_usuarios(usuarios)
+            except Exception as e:
+                print(f"Error al agregar el usuario: {str(e)}")
         elif opcion == "2":
             mostrar_usuarios(usuarios)
         elif opcion == "3":
-            eliminar_usuario(usuarios)
+            try:
+                eliminar_usuario(usuarios)
+                guardar_usuarios(usuarios)
+                print("Usuario eliminado exitosamente.")
+                mostrar_usuarios(usuarios)
+            except Exception as e:
+                print(f"Error al eliminar el usuario: {str(e)}")
         elif opcion == "4":
-            guardar_usuarios(usuarios)
             break
         else:
             print("Opción inválida. Inténtalo de nuevo.")
 
-        if opcion != "2":  # Solo guardar cambios si no es listar usuarios
-            guardar_usuarios(usuarios)
-
 def agregar_usuario(usuarios):
     print("\n--- Nuevo Usuario ---")
-    id_usuario = input("ID del usuario: ")
+    while True:
+        id_usuario = input("ID del usuario: ")
+        # Verificar si el ID ya existe
+        if any(u.get_id_usuario() == id_usuario for u in usuarios):
+            print(f"Error: El ID {id_usuario} ya está en uso. Por favor, elige otro ID.")
+            continue
+        break
+    
     nombre = input("Nombre completo: ")
     correo = input("Correo electrónico: ")
     tipo = input("Tipo de usuario (cliente/estudiante/profesor): ").lower()
-    usuarios.append(Usuario(id_usuario, nombre, correo, tipo))
-    print("Usuario agregado correctamente.")
+    
+    try:
+        nuevo_usuario = Usuario(id_usuario, nombre, correo, tipo)
+        usuarios.append(nuevo_usuario)
+        print("Usuario agregado correctamente.")
+        return nuevo_usuario
+    except Exception as e:
+        print(f"Error al crear el usuario: {str(e)}")
+        return None
 
 def mostrar_usuarios(lista_usuarios):
     if not lista_usuarios:
@@ -247,10 +310,22 @@ def prestar_libro(usuarios, materiales, gestor_prestamos):
             return
 
         # Crear préstamo y actualizar disponibilidad
-        prestamo = gestor_prestamos.agregar_prestamo(material.get_codigo_inventario(), usuarios[usuario_index].get_id_usuario())
-        material.set_disponible(False)
-        usuarios[usuario_index].prestar_libro(material)
-        print("Material prestado correctamente.")
+        try:
+            prestamo = gestor_prestamos.agregar_prestamo(material.get_codigo_inventario(), usuarios[usuario_index].get_id_usuario())
+            if prestamo:
+                material.set_disponible(False)
+                usuarios[usuario_index].prestar_libro(material)
+                print("\nPréstamo realizado exitosamente!")
+                print(f"ID Material: {material.get_codigo_inventario()}")
+                print(f"ID Usuario: {usuarios[usuario_index].get_id_usuario()}")
+                print(f"Fecha de préstamo: {prestamo.fecha_prestamo}")
+                # Guardar el préstamo inmediatamente
+                guardar_prestamos([prestamo])
+            else:
+                print("Error al crear el préstamo.")
+        except Exception as e:
+            print(f"Error al procesar el préstamo: {str(e)}")
+            material.set_disponible(True)  # Restaurar disponibilidad si hay error
     except ValueError:
         print("Entrada inválida.")
     except Exception as e:
@@ -289,8 +364,8 @@ def devolver_libro(usuarios, materiales, gestor_prestamos):
     try:
         # Buscar el usuario que tiene el material prestado
         for usuario in usuarios:
-            if material in usuario.__libros_prestados:
-                usuario.__libros_prestados.remove(material)
+            if material in usuario.get_libros_prestados():
+                usuario.devolver_libro(material)
                 break
     except Exception as e:
         print(f"Error al actualizar libros prestados: {str(e)}")
