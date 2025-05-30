@@ -1,6 +1,6 @@
 from models import Libro, Revista, DVD, Usuario
 from prestamo import GestorPrestamos
-from utils import guardar_materiales, guardar_usuarios
+from utils import cargar_materiales, cargar_usuarios, guardar_prestamos
 
 
 def agregar_material(materiales):
@@ -87,8 +87,9 @@ def mostrar_info_material(materiales):
     except ValueError:
         print("Entrada inválida.")
 
-def Menu(materiales, usuarios):
+def Menu(materiales, usuarios, prestamos):
     gestor_prestamos = GestorPrestamos()
+    gestor_prestamos.prestamos = prestamos
     while True:
         print("\n===== MENÚ BIBLIOTECA =====")
         print("1. Agregar nuevo material")
@@ -106,6 +107,12 @@ def Menu(materiales, usuarios):
             gestion_prestamos(materiales, usuarios, gestor_prestamos)
         elif opcion == "6":
             gestion_usuarios(materiales, usuarios)
+        elif opcion == "8":
+            mostrar_contenido_archivo()
+        elif opcion == "9":
+            # Guardar préstamos antes de salir
+            guardar_prestamos(gestor_prestamos.prestamos)
+            break
 
 def gestion_prestamos(materiales, usuarios, gestor_prestamos):
     while True:
