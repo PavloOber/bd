@@ -1,4 +1,5 @@
 from models import Libro, Revista, DVD, Usuario
+from prestamo import GestorPrestamos
 from utils import guardar_materiales, guardar_usuarios
 
 
@@ -87,6 +88,7 @@ def mostrar_info_material(materiales):
         print("Entrada inválida.")
 
 def Menu(materiales, usuarios):
+    gestor_prestamos = GestorPrestamos()
     while True:
         print("\n===== MENÚ BIBLIOTECA =====")
         print("1. Agregar nuevo material")
@@ -95,12 +97,59 @@ def Menu(materiales, usuarios):
         print("4. Eliminar un material")
         print("5. Cambiar disponibilidad de un material")
         print("6. Gestionar usuarios")
-        print("7. Mostrar contenido del archivo")
-        print("8. Salir")
+        print("7. Gestionar préstamos")
+        print("8. Mostrar contenido del archivo")
+        print("9. Salir")
         opcion = input("\nElige una opción: ")
 
-        if opcion == "6":
+        if opcion == "7":
+            gestion_prestamos(materiales, usuarios, gestor_prestamos)
+        elif opcion == "6":
             gestion_usuarios(materiales, usuarios)
+
+def gestion_prestamos(materiales, usuarios, gestor_prestamos):
+    while True:
+        print("\n===== MENÚ GESTIÓN DE PRÉSTAMOS =====")
+        print("1. Prestar material")
+        print("2. Devolver material")
+        print("3. Listar préstamos")
+        print("4. Buscar préstamo")
+        print("5. Volver al menú principal")
+        opcion = input("\nElige una opción: ")
+
+        if opcion == "1":
+            prestar_libro(usuarios, materiales, gestor_prestamos)
+        elif opcion == "2":
+            devolver_libro(usuarios, materiales, gestor_prestamos)
+        elif opcion == "3":
+            gestor_prestamos.listar_prestamos()
+        elif opcion == "4":
+            print("\n--- Buscar préstamo ---")
+            print("1. Buscar por ID material")
+            print("2. Buscar por ID usuario")
+            opcion_busqueda = input("Elige una opción: ")
+            
+            if opcion_busqueda == "1":
+                id_material = input("Introduce el ID del material: ")
+                resultados = gestor_prestamos.buscar_prestamo(id_material=id_material)
+            elif opcion_busqueda == "2":
+                id_usuario = input("Introduce el ID del usuario: ")
+                resultados = gestor_prestamos.buscar_prestamo(id_usuario=id_usuario)
+            else:
+                print("Opción inválida.")
+                continue
+
+            if resultados:
+                print("\n--- RESULTADOS DE BÚSQUEDA ---")
+                for i, prestamo in enumerate(resultados):
+                    print(f"{i+1}.")
+                    prestamo.mostrar_info()
+            else:
+                print("No se encontraron préstamos.")
+        elif opcion == "5":
+            break
+        else:
+            print("Opción inválida. Inténtalo de nuevo.")
 
 def gestion_usuarios(materiales, usuarios):
     while True:
@@ -108,22 +157,16 @@ def gestion_usuarios(materiales, usuarios):
         print("1. Agregar nuevo usuario")
         print("2. Listar usuarios")
         print("3. Eliminar usuario")
-        print("4. Prestar libro")
-        print("5. Devolver libro")
-        print("6. Volver al menú principal")
+        print("4. Volver al menú principal")
         opcion = input("\nElige una opción: ")
 
         if opcion == "1":
             agregar_usuario(usuarios)
         elif opcion == "2":
-            mostrar_usuarios()
+            mostrar_usuarios(usuarios)
         elif opcion == "3":
             eliminar_usuario(usuarios)
         elif opcion == "4":
-            prestar_libro(usuarios, materiales)
-        elif opcion == "5":
-            devolver_libro(usuarios, materiales)
-        elif opcion == "6":
             guardar_usuarios(usuarios)
             break
         else:
@@ -141,12 +184,23 @@ def agregar_usuario(usuarios):
     usuarios.append(Usuario(id_usuario, nombre, correo, tipo))
     print("Usuario agregado correctamente.")
 
+def mostrar_usuarios(lista_usuarios):
+    if not lista_usuarios:
+        print("No hay usuarios registrados.")
+        return
+
+    print("\n--- Lista de usuarios ---")
+    for i, usuario in enumerate(lista_usuarios):
+        print(f"{i+1}. {usuario.get_nombre()} (ID: {usuario.get_id_usuario()})")
+        # Alternativamente, podríamos usar el método mostrar_info() del usuario
+        # usuario.mostrar_info()
+
 def eliminar_usuario(usuarios):
     if not usuarios:
         print("No hay usuarios registrados.")
         return
 
-    mostrar_usuarios()
+    mostrar_usuarios(usuarios)
     try:
         index = int(input("Selecciona el número del usuario a eliminar: ")) - 1
         if 0 <= index < len(usuarios):
@@ -157,16 +211,17 @@ def eliminar_usuario(usuarios):
     except ValueError:
         print("Entrada inválida.")
 
-def prestar_libro(usuarios, materiales):
+def prestar_libro(usuarios, materiales, gestor_prestamos):
     if not usuarios:
         print("No hay usuarios registrados.")
         return
 
     if not materiales:
-        print("No hay materiales disponibles.")
+        print("No hay materiales registrados.")
         return
 
-    mostrar_usuarios()
+    print("\n--- Prestar Material ---")
+    mostrar_usuarios(usuarios)
     try:
         usuario_index = int(input("Selecciona el número del usuario: ")) - 1
         if not (0 <= usuario_index < len(usuarios)):
@@ -174,49 +229,61 @@ def prestar_libro(usuarios, materiales):
             return
 
         listar_materiales(materiales)
-        material_index = int(input("Selecciona el número del material a prestar: ")) - 1
+        material_index = int(input("Selecciona el número del material: ")) - 1
         if not (0 <= material_index < len(materiales)):
             print("Índice de material inválido.")
             return
 
-        usuario = usuarios[usuario_index]
         material = materiales[material_index]
-        
-        if usuario.prestar_libro(material):
-            print("Libro prestado correctamente.")
-        else:
-            print("El libro no está disponible.")
+        if not material.get_disponible():
+            print("Este material no está disponible para préstamo.")
+            return
+
+        # Crear préstamo y actualizar disponibilidad
+        prestamo = gestor_prestamos.agregar_prestamo(material.get_codigo_inventario(), usuarios[usuario_index].get_id_usuario())
+        material.set_disponible(False)
+        usuarios[usuario_index].prestar_libro(material)
+        print("Material prestado correctamente.")
     except ValueError:
         print("Entrada inválida.")
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
 
-def devolver_libro(usuarios, materiales):
+def devolver_libro(usuarios, materiales, gestor_prestamos):
     if not usuarios:
         print("No hay usuarios registrados.")
         return
 
     if not materiales:
-        print("No hay materiales disponibles.")
+        print("No hay materiales registrados.")
         return
 
-    mostrar_usuarios()
+    print("\n--- Devolver Material ---")
+    listar_materiales(materiales)
     try:
-        usuario_index = int(input("Selecciona el número del usuario: ")) - 1
-        if not (0 <= usuario_index < len(usuarios)):
-            print("Índice de usuario inválido.")
-            return
-
-        listar_materiales(materiales)
-        material_index = int(input("Selecciona el número del material a devolver: ")) - 1
+        material_index = int(input("Selecciona el número del material: ")) - 1
         if not (0 <= material_index < len(materiales)):
             print("Índice de material inválido.")
             return
 
-        usuario = usuarios[usuario_index]
         material = materiales[material_index]
-        
-        if usuario.devolver_libro(material):
-            print("Libro devuelto correctamente.")
-        else:
-            print("El libro no está prestado a este usuario.")
+        if not gestor_prestamos.devolver_prestamo(material.get_codigo_inventario()):
+            print("Este material no está prestado.")
+            return
+
+        material.set_disponible(True)
+        print("Material devuelto correctamente.")
     except ValueError:
         print("Entrada inválida.")
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+
+    # Actualizar la lista de libros prestados del usuario
+    try:
+        # Buscar el usuario que tiene el material prestado
+        for usuario in usuarios:
+            if material in usuario.__libros_prestados:
+                usuario.__libros_prestados.remove(material)
+                break
+    except Exception as e:
+        print(f"Error al actualizar libros prestados: {str(e)}")

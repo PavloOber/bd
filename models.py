@@ -90,6 +90,18 @@ class Usuario:
         self.__tipo_usuario = tipo_usuario
         self.__libros_prestados = []
 
+    def get_id_usuario(self):
+        return self.__id_usuario
+
+    def get_nombre(self):
+        return self.__nombre
+
+    def get_correo(self):
+        return self.__correo
+
+    def get_tipo_usuario(self):
+        return self.__tipo_usuario
+
     def mostrar_info(self):
         print(f"\n--- USUARIO ---")
         print(f"ID: {self.__id_usuario}")
