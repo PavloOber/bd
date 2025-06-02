@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import List
 
 class Prestamo:
-    def __init__(self, id_material: str, id_usuario: str, fecha_prestamo: datetime, fecha_devolucion: datetime = None):
-        self.id_material = id_material
+    def __init__(self, codigo_material: str, id_usuario: str, fecha_prestamo: datetime, fecha_devolucion: datetime = None):
+        self.codigo_material = codigo_material
         self.id_usuario = id_usuario
         self.fecha_prestamo = fecha_prestamo
         self.fecha_devolucion = fecha_devolucion
@@ -16,7 +16,7 @@ class Prestamo:
 
     def mostrar_info(self):
         print(f"\n--- PRÉSTAMO ---")
-        print(f"ID Material: {self.id_material}")
+        print(f"Código Material: {self.codigo_material}")
         print(f"ID Usuario: {self.id_usuario}")
         print(f"Fecha de préstamo: {self.fecha_prestamo.strftime('%d/%m/%Y')}")
         if self.fecha_devolucion:
@@ -28,10 +28,10 @@ class GestorPrestamos:
     def __init__(self):
         self.prestamos: List[Prestamo] = []
 
-    def agregar_prestamo(self, id_material: str, id_usuario: str):
+    def agregar_prestamo(self, codigo_material: str, id_usuario: str):
         try:
             nuevo_prestamo = Prestamo(
-                id_material=id_material,
+                codigo_material=codigo_material,
                 id_usuario=id_usuario,
                 fecha_prestamo=datetime.now(),
                 fecha_devolucion=None
@@ -42,9 +42,9 @@ class GestorPrestamos:
             print(f"Error al crear el préstamo: {str(e)}")
             return None
 
-    def devolver_prestamo(self, id_material: str):
+    def devolver_prestamo(self, codigo_material: str):
         for prestamo in self.prestamos:
-            if prestamo.id_material == id_material and not prestamo.esta_devuelto():
+            if prestamo.codigo_material == codigo_material and not prestamo.esta_devuelto():
                 prestamo.devolver()
                 return True
         return False
@@ -59,10 +59,10 @@ class GestorPrestamos:
             print(f"{i+1}.")
             prestamo.mostrar_info()
 
-    def buscar_prestamo(self, id_material: str = None, id_usuario: str = None):
+    def buscar_prestamo(self, codigo_material: str = None, id_usuario: str = None):
         resultados = []
         for prestamo in self.prestamos:
-            if (id_material and prestamo.id_material == id_material) or \
+            if (codigo_material and prestamo.codigo_material == codigo_material) or \
                (id_usuario and prestamo.id_usuario == id_usuario):
                 resultados.append(prestamo)
         return resultados

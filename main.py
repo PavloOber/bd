@@ -7,7 +7,10 @@ if __name__ == "__main__":
         # Inicializar la base de datos
         db = Database()
         print("\nInicializando la base de datos...")
-        db.init_db()
+        if not db.init_db():
+            print("Error al inicializar la base de datos. Intentando eliminar datos existentes...")
+            db.eliminar_datos()
+            print("Datos eliminados exitosamente")
         
         # Eliminar datos existentes
         materiales = []
