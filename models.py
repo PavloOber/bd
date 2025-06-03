@@ -76,6 +76,17 @@ class MaterialBiblioteca(ABC):
     def __str__(self):
         return f"{self.__tipo.capitalize()}: {self.__titulo} - {self.__autor} ({self.__codigo_inventario})"
 
+    def to_dict(self):
+        """Convierte el objeto a un diccionario"""
+        return {
+            'titulo': self.__titulo,
+            'autor': self.__autor,
+            'codigo_inventario': self.__codigo_inventario,
+            'ubicacion': self.__ubicacion,
+            'tipo': self.__tipo,
+            'disponible': self.__disponible
+        }
+
 class Libro(MaterialBiblioteca):
     def __init__(self, titulo, autor, codigo_inventario, ubicacion, disponible, num_paginas=None, **kwargs):
         super().__init__(titulo, autor, codigo_inventario, ubicacion, "libro", disponible)
@@ -98,6 +109,14 @@ class Libro(MaterialBiblioteca):
         super().validar_datos()
         if self.num_paginas is not None and not isinstance(self.num_paginas, int):
             raise ValueError("El número de páginas debe ser un número entero")
+
+    def to_dict(self):
+        """Convierte el objeto a un diccionario"""
+        base_dict = super().to_dict()
+        base_dict.update({
+            'num_paginas': self.num_paginas
+        })
+        return base_dict
 
 class Revista(MaterialBiblioteca):
     def __init__(self, titulo, autor, codigo_inventario, ubicacion, numero_edicion, fecha_publicacion, disponible=True):
@@ -134,6 +153,15 @@ class Revista(MaterialBiblioteca):
         if not self.fecha_publicacion or not isinstance(self.fecha_publicacion, str):
             raise ValueError("La fecha de publicación debe ser una cadena no vacía")
 
+    def to_dict(self):
+        """Convierte el objeto a un diccionario"""
+        base_dict = super().to_dict()
+        base_dict.update({
+            'numero_edicion': self.numero_edicion,
+            'fecha_publicacion': self.fecha_publicacion
+        })
+        return base_dict
+
 class DVD(MaterialBiblioteca):
     def __init__(self, titulo, autor, codigo_inventario, ubicacion, duracion, formato, disponible=True):
         super().__init__(titulo, autor, codigo_inventario, ubicacion, "dvd", disponible)
@@ -157,6 +185,7 @@ class DVD(MaterialBiblioteca):
         self.formato = formato
 
     def mostrar_info(self):
+        print(f"\n--- DVD ---")
         super().mostrar_info()
         print(f"Duración: {self.duracion} minutos")
         print(f"Formato: {self.formato}")
@@ -168,11 +197,14 @@ class DVD(MaterialBiblioteca):
         if not self.formato or not isinstance(self.formato, str):
             raise ValueError("El formato debe ser una cadena no vacía")
 
-class Usuario:
-    def __init__(self, id_usuario, nombre, correo, tipo_usuario="cliente"):
-        self.__id_usuario = id_usuario
-        self.__nombre = nombre
-        self.__correo = correo
+    def to_dict(self):
+        """Convierte el objeto a un diccionario"""
+        base_dict = super().to_dict()
+        base_dict.update({
+            'duracion': self.duracion,
+            'formato': self.formato
+        })
+        return base_dict
         self.__tipo_usuario = tipo_usuario
         self.__libros_prestados = []
 
