@@ -4,48 +4,93 @@ from utils import cargar_materiales, cargar_usuarios, guardar_prestamos, guardar
 from database import Database
 
 
-def agregar_material(materiales):
+def agregar_material(materiales, db):
+    """Agrega un nuevo material a la biblioteca"""
     print("\n--- Tipo de material ---")
-    tipo = input("¿Qué deseas agregar? (libro / revista / dvd): ").strip().lower()
+    
+    # Validar tipo de material
+    while True:
+        tipo = input("¿Qué deseas agregar? (libro / revista / dvd): ").strip().lower()
+        if tipo in ['libro', 'revista', 'dvd']:
+            break
+        print("Por favor, ingresa un tipo válido (libro, revista o dvd)")
 
-    titulo = input("Título: ")
-    autor = input("Autor/Director: ")
-    codigo = input("Código de inventario: ")
+    # Validar datos comunes
+    while True:
+        titulo = input("Título: ").strip()
+        if titulo:
+            break
+        print("El título no puede estar vacío")
+
+    while True:
+        autor = input("Autor/Director: ").strip()
+        if autor:
+            break
+        print("El autor no puede estar vacío")
+
+    while True:
+        codigo = input("Código de inventario: ").strip()
+        if codigo and not any(m.get_codigo_inventario() == codigo for m in materiales):
+            break
+        print("El código de inventario ya existe o está vacío")
+
     ubicacion = "Biblioteca principal"
 
     try:
+        # Crear el material según su tipo
         if tipo == "libro":
-            paginas = int(input("Número de páginas: "))
-            libro = Libro(titulo, autor, codigo, ubicacion, paginas)
+            while True:
+                try:
+                    paginas = int(input("Número de páginas: "))
+                    if paginas > 0:
+                        break
+                    print("El número de páginas debe ser mayor que 0")
+                except ValueError:
+                    print("Por favor, ingresa un número válido")
+            
+            libro = Libro(titulo, autor, codigo, ubicacion, True, paginas)
             materiales.append(libro)
-            db = Database()
-            db.guardar_material(libro)
-            print("Libro agregado correctamente.")
+            if db.guardar_material(libro):
+                print("Libro agregado correctamente.")
+            else:
+                print("Error al guardar el libro en la base de datos")
+                materiales.pop()
+
         elif tipo == "revista":
-            edicion = input("Número de edición: ")
-            fecha = input("Fecha de publicación (dd/mm/aaaa): ")
+            edicion = input("Número de edición: ").strip()
+            fecha = input("Fecha de publicación (dd/mm/aaaa): ").strip()
+            
             revista = Revista(titulo, autor, codigo, ubicacion, edicion, fecha)
             materiales.append(revista)
-            db = Database()
-            db.guardar_material(revista)
-            print("Revista agregada correctamente.")
+            if db.guardar_material(revista):
+                print("Revista agregada correctamente.")
+            else:
+                print("Error al guardar la revista en la base de datos")
+                materiales.pop()
+
         elif tipo == "dvd":
-            duracion = int(input("Duración (en minutos): "))
-            formato = input("Formato (ej. Blu-ray, DVD): ")
+            while True:
+                try:
+                    duracion = int(input("Duración (en minutos): "))
+                    if duracion > 0:
+                        break
+                    print("La duración debe ser mayor que 0")
+                except ValueError:
+                    print("Por favor, ingresa un número válido")
+            
+            formato = input("Formato (ej. Blu-ray, DVD): ").strip()
+            
             dvd = DVD(titulo, autor, codigo, ubicacion, duracion, formato)
             materiales.append(dvd)
-            db = Database()
-            db.guardar_material(dvd)
-            print("DVD agregado correctamente.")
-        else:
-            print("Tipo de material no reconocido.")
+            if db.guardar_material(dvd):
+                print("DVD agregado correctamente.")
+            else:
+                print("Error al guardar el DVD en la base de datos")
+                materiales.pop()
+
     except Exception as e:
         print(f"Error al agregar el material: {str(e)}")
-        if tipo == "libro":
-            materiales.pop()
-        elif tipo == "revista":
-            materiales.pop()
-        elif tipo == "dvd":
+        if len(materiales) > 0:
             materiales.pop()
 
 def eliminar_material(materiales):
@@ -112,7 +157,8 @@ def mostrar_info_material(materiales):
     except ValueError:
         print("Entrada inválida.")
 
-def Menu(materiales, usuarios, prestamos):
+def Menu(materiales, usuarios, prestamos, db):
+    """Muestra el menú principal y maneja las opciones del usuario"""
     gestor_prestamos = GestorPrestamos()
     gestor_prestamos.prestamos = prestamos
     while True:

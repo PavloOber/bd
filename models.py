@@ -1,20 +1,18 @@
 from abc import ABC, abstractmethod
 
 class MaterialBiblioteca(ABC):
-    def __init__(self, titulo, autor, codigo_inventario, ubicacion, disponible=True):
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, tipo, disponible=True):
         self.__titulo = titulo
         self.__autor = autor
         self.__codigo_inventario = codigo_inventario
         self.__ubicacion = ubicacion
+        self.__tipo = tipo
         self.__disponible = disponible
 
     @abstractmethod
     def mostrar_info(self):
-        print(f"Título: {self.__titulo}")
-        print(f"Autor: {self.__autor}")
-        print(f"Disponible: {'Sí' if self.__disponible else 'No'}")
-        print(f"Código de inventario: {self.__codigo_inventario}")
-        print(f"Ubicación: {self.__ubicacion}")
+        """Muestra la información del material"""
+        pass
 
     # Getters
     def get_titulo(self):
@@ -33,7 +31,7 @@ class MaterialBiblioteca(ABC):
         return self.__disponible
 
     def get_tipo(self):
-        return self.tipo
+        return self.__tipo
 
     # Setters
     def set_titulo(self, titulo):
@@ -51,16 +49,162 @@ class MaterialBiblioteca(ABC):
     def set_disponible(self, disponible):
         self.__disponible = disponible
 
+    def set_tipo(self, tipo):
+        self.__tipo = tipo
+
+    def validar_datos(self):
+        """Valida que los datos sean correctos"""
+        if not self.__titulo or not isinstance(self.__titulo, str):
+            raise ValueError("El título debe ser una cadena no vacía")
+        if not self.__autor or not isinstance(self.__autor, str):
+            raise ValueError("El autor debe ser una cadena no vacía")
+        if not self.__codigo_inventario or not isinstance(self.__codigo_inventario, str):
+            raise ValueError("El código de inventario debe ser una cadena no vacía")
+        if not self.__ubicacion or not isinstance(self.__ubicacion, str):
+            raise ValueError("La ubicación debe ser una cadena no vacía")
+        if not isinstance(self.__disponible, bool):
+            raise ValueError("El estado disponible debe ser True o False")
+
+    def __str__(self):
+        return f"{self.__tipo.capitalize()}: {self.__titulo} - {self.__autor} ({self.__codigo_inventario})"
+
 class Libro(MaterialBiblioteca):
-    def __init__(self, titulo, autor, codigo_inventario, ubicacion, num_paginas=None, disponible=True):
-        super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.tipo = "Libro"
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, disponible, num_paginas=None, **kwargs):
+        super().__init__(titulo, autor, codigo_inventario, ubicacion, "libro", disponible)
         self.num_paginas = num_paginas
 
     def get_num_paginas(self):
         return self.num_paginas
 
     def set_num_paginas(self, num_paginas):
+        if num_paginas is not None and not isinstance(num_paginas, int):
+            raise ValueError("El número de páginas debe ser un número entero")
+        self.num_paginas = num_paginas
+
+    def mostrar_info(self):
+        super().mostrar_info()
+        if self.num_paginas is not None:
+            print(f"Número de páginas: {self.num_paginas}")
+
+    def validar_datos(self):
+        super().validar_datos()
+        if self.num_paginas is not None and not isinstance(self.num_paginas, int):
+            raise ValueError("El número de páginas debe ser un número entero")
+
+class Revista(MaterialBiblioteca):
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, numero_edicion, fecha_publicacion, disponible=True):
+        super().__init__(titulo, autor, codigo_inventario, ubicacion, "revista", disponible)
+        self.numero_edicion = numero_edicion
+        self.fecha_publicacion = fecha_publicacion
+
+    def get_numero_edicion(self):
+        return self.numero_edicion
+
+    def set_numero_edicion(self, numero_edicion):
+        if not isinstance(numero_edicion, str):
+            raise ValueError("El número de edición debe ser una cadena")
+        self.numero_edicion = numero_edicion
+
+    def get_fecha_publicacion(self):
+        return self.fecha_publicacion
+
+    def set_fecha_publicacion(self, fecha_publicacion):
+        if not isinstance(fecha_publicacion, str):
+            raise ValueError("La fecha de publicación debe ser una cadena")
+        self.fecha_publicacion = fecha_publicacion
+
+    def mostrar_info(self):
+        super().mostrar_info()
+        print(f"Edición: {self.numero_edicion}")
+        print(f"Fecha de publicación: {self.fecha_publicacion}")
+
+    def validar_datos(self):
+        super().validar_datos()
+        if not self.numero_edicion or not isinstance(self.numero_edicion, str):
+            raise ValueError("El número de edición debe ser una cadena no vacía")
+        if not self.fecha_publicacion or not isinstance(self.fecha_publicacion, str):
+            raise ValueError("La fecha de publicación debe ser una cadena no vacía")
+
+class DVD(MaterialBiblioteca):
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, duracion, formato, disponible=True):
+        super().__init__(titulo, autor, codigo_inventario, ubicacion, "dvd", disponible)
+        self.duracion = duracion
+        self.formato = formato
+
+    def get_duracion(self):
+        return self.duracion
+
+    def set_duracion(self, duracion):
+        if not isinstance(duracion, int):
+            raise ValueError("La duración debe ser un número entero")
+        self.duracion = duracion
+
+    def get_formato(self):
+        return self.formato
+
+    def set_formato(self, formato):
+        if not isinstance(formato, str):
+            raise ValueError("El formato debe ser una cadena")
+        self.formato = formato
+
+    def mostrar_info(self):
+        super().mostrar_info()
+        print(f"Duración: {self.duracion} minutos")
+        print(f"Formato: {self.formato}")
+
+    def validar_datos(self):
+        super().validar_datos()
+        if not isinstance(self.duracion, int):
+            raise ValueError("La duración debe ser un número entero")
+        if not self.formato or not isinstance(self.formato, str):
+            raise ValueError("El formato debe ser una cadena no vacía")
+
+class Usuario:
+    def __init__(self, id_usuario, nombre, correo, tipo_usuario="cliente"):
+        self.__id_usuario = id_usuario
+        self.__nombre = nombre
+        self.__correo = correo
+        self.__tipo_usuario = tipo_usuario
+        self.__libros_prestados = []
+
+    def get_id_usuario(self):
+        return self.__id_usuario
+
+    def get_nombre(self):
+        return self.__nombre
+
+    def get_correo(self):
+        return self.__correo
+
+    def get_tipo_usuario(self):
+        return self.__tipo_usuario
+
+    def set_nombre(self, nombre):
+        self.__nombre = nombre
+
+    def set_correo(self, correo):
+        self.__correo = correo
+
+    def set_tipo_usuario(self, tipo_usuario):
+        self.__tipo_usuario = tipo_usuario
+
+    def __str__(self):
+        return f"Usuario: {self.__nombre} ({self.__correo}) - Tipo: {self.__tipo_usuario}"
+
+    def validar_datos(self):
+        if not self.__nombre or not isinstance(self.__nombre, str):
+            raise ValueError("El nombre debe ser una cadena no vacía")
+        if not self.__correo or not isinstance(self.__correo, str):
+            raise ValueError("El correo debe ser una cadena no vacía")
+        if not self.__tipo_usuario or not isinstance(self.__tipo_usuario, str):
+            raise ValueError("El tipo de usuario debe ser una cadena no vacía")
+
+    def get_num_paginas(self):
+        return self.num_paginas
+
+    def set_num_paginas(self, num_paginas):
+        if num_paginas is not None and not isinstance(num_paginas, int):
+            raise ValueError("El número de páginas debe ser un número entero")
         self.num_paginas = num_paginas
 
     def get_tipo(self):
