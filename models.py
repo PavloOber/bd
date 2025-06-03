@@ -9,6 +9,14 @@ class MaterialBiblioteca(ABC):
         self.__tipo = tipo
         self.__disponible = disponible
 
+    def get_tipo(self):
+        return self.__tipo
+
+    def set_tipo(self, tipo):
+        if not isinstance(tipo, str):
+            raise ValueError("El tipo debe ser una cadena")
+        self.__tipo = tipo
+
     @abstractmethod
     def mostrar_info(self):
         """Muestra la información del material"""
@@ -115,8 +123,9 @@ class Revista(MaterialBiblioteca):
 
     def mostrar_info(self):
         super().mostrar_info()
-        print(f"Edición: {self.numero_edicion}")
-        print(f"Fecha de publicación: {self.fecha_publicacion}")
+        print(f"Edición: {self.get_numero_edicion()}")
+        print(f"Fecha de publicación: {self.get_fecha_publicacion()}")
+        print("--- REVISTA ---")
 
     def validar_datos(self):
         super().validar_datos()
@@ -179,86 +188,59 @@ class Usuario:
     def get_tipo_usuario(self):
         return self.__tipo_usuario
 
-    def set_nombre(self, nombre):
-        self.__nombre = nombre
-
-    def set_correo(self, correo):
-        self.__correo = correo
-
-    def set_tipo_usuario(self, tipo_usuario):
-        self.__tipo_usuario = tipo_usuario
-
-    def __str__(self):
-        return f"Usuario: {self.__nombre} ({self.__correo}) - Tipo: {self.__tipo_usuario}"
-
-    def validar_datos(self):
-        if not self.__nombre or not isinstance(self.__nombre, str):
-            raise ValueError("El nombre debe ser una cadena no vacía")
-        if not self.__correo or not isinstance(self.__correo, str):
-            raise ValueError("El correo debe ser una cadena no vacía")
-        if not self.__tipo_usuario or not isinstance(self.__tipo_usuario, str):
-            raise ValueError("El tipo de usuario debe ser una cadena no vacía")
-
-    def get_num_paginas(self):
-        return self.num_paginas
-
-    def set_num_paginas(self, num_paginas):
-        if num_paginas is not None and not isinstance(num_paginas, int):
-            raise ValueError("El número de páginas debe ser un número entero")
-        self.num_paginas = num_paginas
-
-    def get_tipo(self):
-        return self.tipo
-
-    def mostrar_info(self):
-        print(f"\n--- LIBRO ---")
         super().mostrar_info()
         if self.num_paginas is not None:
             print(f"Número de páginas: {self.num_paginas}")
 
 class Revista(MaterialBiblioteca):
-    def __init__(self, titulo, autor, codigo_inventario, numero_edicion, fecha_publicacion, ubicacion, disponible=True):
-        super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.tipo = "Revista"
-        self.numero_edicion = numero_edicion
-        self.fecha_publicacion = fecha_publicacion
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, numero_edicion, fecha_publicacion, disponible=True):
+        super().__init__(titulo, autor, codigo_inventario, ubicacion, "revista", disponible)
+        self.__numero_edicion = numero_edicion
+        self.__fecha_publicacion = fecha_publicacion
 
     def get_numero_edicion(self):
-        return self.numero_edicion
+        return self.__numero_edicion
 
     def set_numero_edicion(self, numero_edicion):
-        self.numero_edicion = numero_edicion
+        if not isinstance(numero_edicion, str):
+            raise ValueError("El número de edición debe ser una cadena")
+        self.__numero_edicion = numero_edicion
 
     def get_fecha_publicacion(self):
-        return self.fecha_publicacion
+        return self.__fecha_publicacion
 
     def set_fecha_publicacion(self, fecha_publicacion):
-        self.fecha_publicacion = fecha_publicacion
+        if not isinstance(fecha_publicacion, str):
+            raise ValueError("La fecha de publicación debe ser una cadena")
+        self.__fecha_publicacion = fecha_publicacion
 
     def mostrar_info(self):
-        print(f"\n--- REVISTA ---")
         super().mostrar_info()
-        print(f"Edición: {self.__numero_edicion}")
-        print(f"Fecha: {self.__fecha_publicacion}")
+        print(f"Edición: {self.get_numero_edicion()}")
+        print(f"Fecha de publicación: {self.get_fecha_publicacion()}")
+        print("--- REVISTA ---")
 
 class DVD(MaterialBiblioteca):
-    def __init__(self, titulo, autor, codigo_inventario, duracion, formato, ubicacion, disponible=True):
-        super().__init__(titulo, autor, codigo_inventario, ubicacion, disponible)
-        self.tipo = "DVD"
-        self.duracion = duracion
-        self.formato = formato
+    def __init__(self, titulo, autor, codigo_inventario, ubicacion, duracion, formato, disponible=True):
+        super().__init__(titulo, autor, codigo_inventario, ubicacion, "dvd", disponible)
+        self.__duracion = duracion
+        self.__formato = formato
 
     def get_duracion(self):
-        return self.duracion
+        return self.__duracion
 
     def set_duracion(self, duracion):
-        self.duracion = duracion
+        if not isinstance(duracion, int):
+            raise ValueError("La duración debe ser un número entero")
+        self.__duracion = duracion
 
     def get_formato(self):
-        return self.formato
+        return self.__formato
 
     def set_formato(self, formato):
-        self.formato = formato
+        if not isinstance(formato, str):
+            raise ValueError("El formato debe ser una cadena")
+        self.__formato = formato
 
     def mostrar_info(self):
         print(f"\n--- DVD ---")
@@ -335,3 +317,15 @@ class Usuario:
 
     def set_tipo_usuario(self, tipo_usuario):
         self.__tipo_usuario = tipo_usuario
+
+    def validar_datos(self):
+        if not self.__id_usuario or not isinstance(self.__id_usuario, str):
+            raise ValueError("El ID de usuario debe ser una cadena no vacía")
+        if not self.__nombre or not isinstance(self.__nombre, str):
+            raise ValueError("El nombre debe ser una cadena no vacía")
+        if not self.__correo or not isinstance(self.__correo, str):
+            raise ValueError("El correo debe ser una cadena no vacía")
+        if not isinstance(self.__tipo_usuario, str):
+            raise ValueError("El tipo de usuario debe ser una cadena")
+        if self.__tipo_usuario not in ["cliente", "administrador"]:
+            raise ValueError("El tipo de usuario debe ser 'cliente' o 'administrador'")

@@ -38,7 +38,7 @@ def cargar_prestamos():
             
             # Crear objeto Prestamo
             prestamo = Prestamo(
-                codigo_material=prestamo_data['codigo_material'],
+                codigo_inventario=prestamo_data['codigo_inventario'],
                 id_usuario=prestamo_data['id_usuario'],
                 fecha_prestamo=fecha_prestamo,
                 fecha_devolucion=fecha_devolucion

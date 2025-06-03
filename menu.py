@@ -222,8 +222,8 @@ def gestion_prestamos(materiales, usuarios, gestor_prestamos):
             opcion_busqueda = input("Elige una opción: ")
             
             if opcion_busqueda == "1":
-                id_material = input("Introduce el ID del material: ")
-                resultados = gestor_prestamos.buscar_prestamo(id_material=id_material)
+                id_inventario = input("Introduce el ID del material: ")
+                resultados = gestor_prestamos.buscar_prestamo(id_inventario=id_inventario)
             elif opcion_busqueda == "2":
                 id_usuario = input("Introduce el ID del usuario: ")
                 resultados = gestor_prestamos.buscar_prestamo(id_usuario=id_usuario)

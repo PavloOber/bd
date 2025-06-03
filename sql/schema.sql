@@ -32,17 +32,47 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Crear tabla préstamos
-CREATE OR REPLACE FUNCTION create_prestamos_table()
+CREATE OR REPLACE FUNCTION public.create_prestamos_table()
 RETURNS void AS $$
 BEGIN
-    CREATE TABLE IF NOT EXISTS prestamos (
+    CREATE TABLE IF NOT EXISTS public.prestamos (
         id SERIAL PRIMARY KEY,
-        id_usuario INTEGER REFERENCES usuarios(id_usuario),
-        codigo_material VARCHAR(20) REFERENCES materiales(codigo_inventario),
-        fecha_prestamo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        fecha_devolucion TIMESTAMP,
+        id_usuario INTEGER REFERENCES public.usuarios(id_usuario),
+        id_material VARCHAR(20) REFERENCES public.materiales(codigo_inventario),
+        fecha_prestamo TIMESTAMP WITHOUT TIME ZONE,
+        fecha_devolucion TIMESTAMP WITHOUT TIME ZONE,
         devuelto BOOLEAN DEFAULT false
     );
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para eliminar tabla préstamos
+CREATE OR REPLACE FUNCTION public.drop_prestamos_table()
+RETURNS void AS $$
+BEGIN
+    DROP TABLE IF EXISTS public.prestamos;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener columnas de la tabla préstamos
+CREATE OR REPLACE FUNCTION public.get_prestamos_columns()
+RETURNS TABLE(column_name text, data_type text) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT column_name, data_type
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'prestamos';
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener políticas RLS de la tabla préstamos
+CREATE OR REPLACE FUNCTION public.get_prestamos_policies()
+RETURNS TABLE(policy_name text, command text, using_expression text) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT policyname, cmd, using_expression
+    FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'prestamos';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -128,22 +158,16 @@ BEGIN
     
     CREATE POLICY "Usuarios pueden ver sus propios préstamos" ON prestamos
     FOR SELECT
-    TO authenticated
     USING (
-        EXISTS (
-            SELECT 1 FROM usuarios 
-            WHERE usuarios.correo = auth.uid()::text 
-            AND usuarios.id_usuario = prestamos.id_usuario
-        )
+        id_usuario = auth.uid()
     );
-    
+
     CREATE POLICY "Administradores pueden ver todos los préstamos" ON prestamos
     FOR SELECT
-    TO authenticated
     USING (
         EXISTS (
             SELECT 1 FROM usuarios 
-            WHERE usuarios.correo = auth.uid()::text 
+            WHERE usuarios.id_usuario = auth.uid() 
             AND usuarios.tipo_usuario = 'administrador'
         )
     );
