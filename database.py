@@ -6,30 +6,28 @@ from datetime import datetime
 
 class Database:
     def __init__(self):
+        # Usar el rol de servicio para tener todos los permisos
         self.client = supabase.Client(SUPABASE_URL, SUPABASE_KEY)
 
     def eliminar_datos(self):
         """
-        Elimina datos de las tablas, manteniendo el usuario de prueba.
+        Elimina todos los datos de las tablas.
         """
         try:
             # Eliminar préstamos
-            prestamos = self.client.table('prestamos').select('id').execute()
-            if prestamos.data:
-                ids_prestamos = [item['id'] for item in prestamos.data]
-                self.client.table('prestamos').delete().in_('id', ids_prestamos).execute()
+            self.client.table('prestamos').delete().execute()
             
             # Eliminar materiales
-            materiales = self.client.table('materiales').select('codigo_inventario').execute()
-            if materiales.data:
-                codigos_materiales = [item['codigo_inventario'] for item in materiales.data]
-                self.client.table('materiales').delete().in_('codigo_inventario', codigos_materiales).execute()
+            self.client.table('materiales').delete().execute()
             
             # Eliminar usuarios (excepto el de prueba)
-            usuarios = self.client.table('usuarios').select('id_usuario').execute()
-            if usuarios.data:
-                ids_usuarios = [item['id_usuario'] for item in usuarios.data if item['id_usuario'] != 'USR000']
-                self.client.table('usuarios').delete().in_('id_usuario', ids_usuarios).execute()
+            self.client.table('usuarios').delete().neq('id_usuario', 'USR000').execute()
+            
+            print("Datos eliminados exitosamente")
+            return True
+        except Exception as e:
+            print(f"Error al eliminar datos: {str(e)}")
+            return False
             
             # Recrear las tablas y políticas
             self.client.rpc('create_usuarios_table').execute()
@@ -45,10 +43,39 @@ class Database:
             print(f"Error al eliminar datos: {str(e)}")
             return False
 
+    def verificar_datos(self):
+        """Verifica si hay datos en las tablas"""
+        try:
+            # Contar materiales
+            materiales_count = self.client.table('materiales').select('count(*)').execute()
+            print(f"Número de materiales: {materiales_count.data}")
+            
+            # Contar usuarios
+            usuarios_count = self.client.table('usuarios').select('count(*)').execute()
+            print(f"Número de usuarios: {usuarios_count.data}")
+            
+            # Contar préstamos
+            prestamos_count = self.client.table('prestamos').select('count(*)').execute()
+            print(f"Número de préstamos: {prestamos_count.data}")
+            
+            return True
+        except Exception as e:
+            print(f"Error al verificar datos: {str(e)}")
+            return False
+
     def obtener_materiales(self):
         """Obtiene todos los materiales"""
         try:
+            print("Consultando materiales...")
             response = self.client.table('materiales').select('*').execute()
+            print("Respuesta recibida:", response)
+            print("Datos en la respuesta:", response.data)
+            
+            # Verificar si hay datos
+            if not response.data:
+                print("No se encontraron datos en la tabla materiales")
+                return []
+                
             materiales = []
             for row in response.data:
                 base_data = {
@@ -168,8 +195,23 @@ class Database:
         
         for tabla in tablas:
             try:
+                # Intentar seleccionar un registro
                 result = self.client.table(tabla).select('*').limit(1).execute()
-                if result.data:
+                if not result.data:
+                    # Si no hay datos, intentar crear la tabla
+                    try:
+                        if tabla == 'usuarios':
+                            self.client.rpc('create_usuarios_table').execute()
+                            self.client.rpc('create_usuarios_policies').execute()
+                        elif tabla == 'materiales':
+                            self.client.rpc('create_materiales_table').execute()
+                            self.client.rpc('create_materiales_policies').execute()
+                        elif tabla == 'prestamos':
+                            self.client.rpc('create_prestamos_table').execute()
+                            self.client.rpc('create_prestamos_policies').execute()
+                    except Exception as e:
+                        print(f"Error al crear tabla {tabla}: {str(e)}")
+                        return False
                     print(f"Tabla {tabla} ya existe y tiene datos")
                 else:
                     print(f"Tabla {tabla} ya existe pero está vacía")

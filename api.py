@@ -49,6 +49,43 @@ class PrestamoCreate(BaseModel):
 async def root():
     return {"message": "Bienvenido a la API de la Biblioteca"}
 
+@app.get("/verificar-datos")
+async def verificar_datos():
+    try:
+        if db.verificar_datos():
+            return {"message": "Datos verificados exitosamente"}
+        else:
+            return {"message": "No se pudieron verificar los datos"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/crear-material-prueba")
+async def crear_material_prueba():
+    try:
+        material = {
+            "codigo_inventario": "MAT001",
+            "titulo": "Material de Prueba",
+            "autor": "Autor de Prueba",
+            "tipo": "libro",
+            "disponible": True,
+            "ubicacion": "Sección A",
+            "num_paginas": 100
+        }
+        response = await crear_material(MaterialCreate(**material))
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/eliminar-datos")
+async def eliminar_datos():
+    try:
+        if db.eliminar_datos():
+            return {"message": "Datos eliminados exitosamente"}
+        else:
+            return {"message": "No se pudieron eliminar los datos"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Endpoints para materiales
 @app.post("/materiales/")
 async def crear_material(material: MaterialCreate):

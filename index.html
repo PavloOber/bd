@@ -65,7 +65,7 @@
                 <input type="text" id="material-autor" placeholder="Autor">
                 <input type="text" id="material-codigo-inventario" placeholder="Código de inventario">
                 <input type="text" id="material-ubicacion" placeholder="Ubicación">
-                <select id="material-tipo" onchange="mostrarCamposEspecificos(this.value)">
+                <select id="material-tipo">
                     <option value="">Selecciona un tipo</option>
                     <option value="libro">Libro</option>
                     <option value="revista">Revista</option>
@@ -97,7 +97,12 @@
                 <h3>Agregar Usuario</h3>
                 <input type="text" id="usuario-nombre" placeholder="Nombre">
                 <input type="text" id="usuario-correo" placeholder="Correo">
-                <input type="text" id="usuario-tipo" placeholder="Tipo de usuario">
+                <select id="usuario-tipo">
+                    <option value="">Selecciona un tipo de usuario</option>
+                    <option value="administrador">Administrador</option>
+                    <option value="bibliotecario">Bibliotecario</option>
+                    <option value="usuario">Usuario</option>
+                </select>
                 <button id="guardar-usuario">Guardar Usuario</button>
             </div>
             
@@ -111,27 +116,12 @@
                 <button id="guardar-prestamo">Guardar Préstamo</button>
             </div>
         </div>
-        </div>
         <h2>Resultados:</h2>
         <div id="data-container">
             <pre id="response-data">Seleccione una opción para ver los datos...</pre>
         </div>
     </div>
 
-    <script>
-        // Función para mostrar campos específicos según el tipo de material
-        function mostrarCamposEspecificos(tipo) {
-            const guardarBtn = document.getElementById('guardar-material');
-            guardarBtn.disabled = !tipo;
-            const camposLibro = document.getElementById('campos-libro');
-            const camposRevista = document.getElementById('campos-revista');
-            const camposDvd = document.getElementById('campos-dvd');
-            
-            camposLibro.style.display = tipo === 'libro' ? 'block' : 'none';
-            camposRevista.style.display = tipo === 'revista' ? 'block' : 'none';
-            camposDvd.style.display = tipo === 'dvd' ? 'block' : 'none';
-        }
-    </script>
     <script src="script.js"></script>
 </body>
 </html>
