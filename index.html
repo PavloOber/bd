@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Básico JS</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        #container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #data-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Interfaz de Usuario</h1>
+        <div>
+            <button id="listar-materiales-btn">Listar Materiales</button>
+            <button id="listar-usuarios-btn">Listar Usuarios</button>
+            <button id="listar-prestamos-btn">Listar Prestamos</button>
+        </div>
+        <br>
+        <div>
+            <button id="agregar-material-btn">Agregar Material</button>
+            <button id="agregar-usuario-btn">Agregar Usuario</button>
+            <button id="agregar-prestamo-btn">Agregar Prestamo</button>
+        </div>
+        <br>
+        <div id="formularios" style="display: none;">
+            <!-- Formulario para agregar material -->
+            <div id="form-material" style="display: none;">
+                <h3>Agregar Material</h3>
+                <input type="text" id="material-titulo" placeholder="Título">
+                <input type="text" id="material-autor" placeholder="Autor">
+                <input type="text" id="material-codigo-inventario" placeholder="Código de inventario">
+                <input type="text" id="material-ubicacion" placeholder="Ubicación">
+                <select id="material-tipo" onchange="mostrarCamposEspecificos(this.value)">
+                    <option value="">Selecciona un tipo</option>
+                    <option value="libro">Libro</option>
+                    <option value="revista">Revista</option>
+                    <option value="dvd">DVD</option>
+                </select>
+                
+                <!-- Campos específicos para Libro -->
+                <div id="campos-libro" style="display: none;">
+                    <input type="number" id="material-num-paginas" placeholder="Número de páginas">
+                </div>
+                
+                <!-- Campos específicos para Revista -->
+                <div id="campos-revista" style="display: none;">
+                    <input type="number" id="material-num-edicion" placeholder="Número de edición">
+                    <input type="date" id="material-fecha-publicacion" placeholder="Fecha de publicación">
+                </div>
+                
+                <!-- Campos específicos para DVD -->
+                <div id="campos-dvd" style="display: none;">
+                    <input type="number" id="material-duracion" placeholder="Duración (minutos)">
+                    <input type="text" id="material-formato" placeholder="Formato">
+                </div>
+                
+                <button id="guardar-material" disabled>Guardar Material</button>
+            </div>
+            
+            <!-- Formulario para agregar usuario -->
+            <div id="form-usuario" style="display: none;">
+                <h3>Agregar Usuario</h3>
+                <input type="text" id="usuario-nombre" placeholder="Nombre">
+                <input type="text" id="usuario-correo" placeholder="Correo">
+                <input type="text" id="usuario-tipo" placeholder="Tipo de usuario">
+                <button id="guardar-usuario">Guardar Usuario</button>
+            </div>
+            
+            <!-- Formulario para agregar préstamo -->
+            <div id="form-prestamo" style="display: none;">
+                <h3>Agregar Préstamo</h3>
+                <input type="text" id="prestamo-material" placeholder="ID del material">
+                <input type="text" id="prestamo-usuario" placeholder="ID del usuario">
+                <input type="date" id="prestamo-fecha-prestamo" placeholder="Fecha de préstamo">
+                <input type="date" id="prestamo-fecha-devolucion" placeholder="Fecha de devolución">
+                <button id="guardar-prestamo">Guardar Préstamo</button>
+            </div>
+        </div>
+        </div>
+        <h2>Resultados:</h2>
+        <div id="data-container">
+            <pre id="response-data">Seleccione una opción para ver los datos...</pre>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar campos específicos según el tipo de material
+        function mostrarCamposEspecificos(tipo) {
+            const guardarBtn = document.getElementById('guardar-material');
+            guardarBtn.disabled = !tipo;
+            const camposLibro = document.getElementById('campos-libro');
+            const camposRevista = document.getElementById('campos-revista');
+            const camposDvd = document.getElementById('campos-dvd');
+            
+            camposLibro.style.display = tipo === 'libro' ? 'block' : 'none';
+            camposRevista.style.display = tipo === 'revista' ? 'block' : 'none';
+            camposDvd.style.display = tipo === 'dvd' ? 'block' : 'none';
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
