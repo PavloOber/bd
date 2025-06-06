@@ -55,11 +55,12 @@
             <button id="agregar-material-btn">Agregar Material</button>
             <button id="agregar-usuario-btn">Agregar Usuario</button>
             <button id="agregar-prestamo-btn">Agregar Prestamo</button>
+            <button id="agregar-resena-btn">Agregar Reseña</button>
         </div>
         <br>
         <div id="formularios" style="display: none;">
             <!-- Formulario para agregar material -->
-            <div id="form-material" style="display: none;">
+            <form id="form-material" style="display: none;">
                 <h3>Agregar Material</h3>
                 <input type="text" id="material-titulo" placeholder="Título">
                 <input type="text" id="material-autor" placeholder="Autor">
@@ -90,10 +91,10 @@
                 </div>
                 
                 <button id="guardar-material" disabled>Guardar Material</button>
-            </div>
+            </form>
             
             <!-- Formulario para agregar usuario -->
-            <div id="form-usuario" style="display: none;">
+            <form id="form-usuario" style="display: none;">
                 <h3>Agregar Usuario</h3>
                 <input type="text" id="usuario-nombre" placeholder="Nombre">
                 <input type="text" id="usuario-correo" placeholder="Correo">
@@ -104,24 +105,107 @@
                     <option value="usuario">Usuario</option>
                 </select>
                 <button id="guardar-usuario">Guardar Usuario</button>
-            </div>
+            </form>
             
             <!-- Formulario para agregar préstamo -->
-            <div id="form-prestamo" style="display: none;">
+            <form id="form-prestamo" style="display: none;">
                 <h3>Agregar Préstamo</h3>
                 <input type="text" id="prestamo-material" placeholder="ID del material">
                 <input type="text" id="prestamo-usuario" placeholder="ID del usuario">
                 <input type="date" id="prestamo-fecha-prestamo" placeholder="Fecha de préstamo">
                 <input type="date" id="prestamo-fecha-devolucion" placeholder="Fecha de devolución">
                 <button id="guardar-prestamo">Guardar Préstamo</button>
-            </div>
+            </form>
+            
+            <!-- Formulario para agregar reseña -->
+            <form id="form-resena" style="display: none;">
+                <h3>Agregar Reseña</h3>
+                <select id="resena-material" required>
+                    <option value="">Seleccione un material</option>
+                    <!-- Se llenará dinámicamente -->
+                </select>
+                <select id="resena-usuario" required>
+                    <option value="">Seleccione un usuario</option>
+                    <!-- Se llenará dinámicamente -->
+                </select>
+                <select id="resena-calificacion" required>
+                    <option value="">Calificación</option>
+                    <option value="1">1 - Muy malo</option>
+                    <option value="2">2 - Malo</option>
+                    <option value="3">3 - Regular</option>
+                    <option value="4">4 - Bueno</option>
+                    <option value="5">5 - Excelente</option>
+                </select>
+                <textarea id="resena-comentario" placeholder="Escribe tu reseña (mínimo 10 caracteres)" required minlength="10" maxlength="500"></textarea>
+                <button id="guardar-resena">Guardar Reseña</button>
+            </form>
         </div>
-        <h2>Resultados:</h2>
-        <div id="data-container">
-            <pre id="response-data">Seleccione una opción para ver los datos...</pre>
+        <div class="tabs">
+            <button class="tab-button active" data-tab="resultados">Resultados</button>
+            <button class="tab-button" data-tab="resenas">Reseñas</button>
+        </div>
+        <div class="tab-content">
+            <div id="resultados-tab" class="tab-pane active">
+                <h2>Resultados:</h2>
+                <div id="data-container">
+                    <pre id="response-data">Seleccione una opción para ver los datos...</pre>
+                </div>
+            </div>
+            <div id="resenas-tab" class="tab-pane">
+                <h2>Reseñas</h2>
+                <div id="resenas-container">
+                    <p>Aquí se mostrarán las reseñas...</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <style>
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .tab-pane {
+            display: none;
+            padding: 20px 0;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        #form-resena textarea {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        .resena-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .resena-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .resena-calificacion {
+            font-weight: bold;
+            color: #FFA500;
+        }
+    </style>
     <script src="script.js"></script>
 </body>
 </html>

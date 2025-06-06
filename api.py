@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
@@ -7,16 +7,10 @@ from models import MaterialBiblioteca, Usuario, Libro, Revista, DVD
 from prestamo import Prestamo
 from datetime import datetime
 
-app = FastAPI(title="API Biblioteca")
+# Crear un router en lugar de una aplicación FastAPI
+router = APIRouter(prefix="/api")
 
-# Configurar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Crear una instancia de la base de datos
 
 # Crear una instancia de la base de datos
 db = Database()
@@ -45,13 +39,12 @@ class PrestamoCreate(BaseModel):
     id_usuario: str
     codigo_inventario: str
 
-@app.get("/")
+@router.get("/")
 async def root():
     return {"message": "Bienvenido a la API de la Biblioteca"}
 
-
 # Endpoints para materiales
-@app.post("/materiales/")
+@router.post("/materiales/", response_model=dict)
 async def crear_material(material: MaterialCreate):
     try:
         # Crear el material según su tipo
@@ -92,7 +85,7 @@ async def crear_material(material: MaterialCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/materiales/")
+@router.get("/materiales/")
 async def listar_materiales():
     try:
         materiales = db.obtener_materiales()
@@ -101,7 +94,7 @@ async def listar_materiales():
         raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoints para usuarios
-@app.post("/usuarios/")
+@router.post("/usuarios/")
 async def crear_usuario(usuario: UsuarioCreate):
     try:
         nuevo_usuario = Usuario(
@@ -117,7 +110,7 @@ async def crear_usuario(usuario: UsuarioCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/usuarios/")
+@router.get("/usuarios/")
 async def listar_usuarios():
     try:
         usuarios = db.obtener_usuarios()
@@ -126,7 +119,7 @@ async def listar_usuarios():
         raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoints para préstamos
-@app.post("/prestamos/")
+@router.post("/prestamos/")
 async def crear_prestamo(prestamo: PrestamoCreate):
     try:
         nuevo_prestamo = Prestamo(
@@ -142,7 +135,7 @@ async def crear_prestamo(prestamo: PrestamoCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/prestamos/")
+@router.get("/prestamos/")
 async def listar_prestamos():
     try:
         prestamos = db.obtener_prestamos()
@@ -150,7 +143,7 @@ async def listar_prestamos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/prestamos/devolver/{codigo_inventario}")
+@router.put("/prestamos/devolver/{codigo_inventario}")
 async def devolver_prestamo(codigo_inventario: str):
     try:
         if db.devolver_prestamo(codigo_inventario):

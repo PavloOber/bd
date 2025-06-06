@@ -1,0 +1,11 @@
+
+curl -X POST http://localhost:5000/api/resenas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo_inventario": "DVD001",
+    "usuario_id": "USR001",
+    "calificacion": 5,
+    "comentario": "Excelente material"
+  }'
+
+  curl http://localhost:5000/api/materiales/DVD001/estadisticas

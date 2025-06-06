@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import app
+from api import router as api_router
+
+app = FastAPI(title="API Biblioteca")
 
 # Configurar CORS
 app.add_middleware(
@@ -11,6 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Incluir las rutas de la API
+app.include_router(api_router)
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("run_api:app", host="0.0.0.0", port=5001, reload=True)
